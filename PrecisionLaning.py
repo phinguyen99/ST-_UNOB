@@ -19,8 +19,8 @@ import imutils
 #######VARIABLES####################
 ##Aruco
 id_to_find = 26
-marker_size = 19 #cm
-takeoff_height = 8
+marker_size = 16 #cm
+takeoff_height = 3
 velocity = .5
 
 aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
@@ -52,18 +52,7 @@ manualArm=True ##If True, arming from RC controller, If False, arming from this 
 #########FUNCTIONS#################
 
 def connectMyCopter():
-
-	parser = argparse.ArgumentParser(description='commands')
-	parser.add_argument('--connect')
-	args = parser.parse_args()
-
-	connection_string = args.connect
-
-	if not connection_string:
-            connection_string='127.0.0.1:14550'
-
-	vehicle = connect(connection_string,wait_ready=True)
-
+	vehicle = connect('/dev/ttyTHS1', wait_ready=True, baud=57600)
 	return vehicle
 
 def arm_and_takeoff(targetHeight):
