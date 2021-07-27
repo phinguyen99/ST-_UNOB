@@ -4,6 +4,47 @@ import cv2
 import glob
 import random
 from pyzbar.pyzbar import decode
+import os
+
+
+
+
+### CREATE A DIRECTORY TO SAVE ALL THE IMAGE AND DATA OF COLLECTED SOURADNICE ##########
+
+# Directory
+directory = "Mission_2"
+# Parent Directory path
+parent_dir = "C:/Users/Phi Nguyen/Desktop/Lưu tạm/"
+  
+# Path
+path = os.path.join(parent_dir, directory)
+  
+# Create the directory
+# 'GeeksForGeeks' in
+# '/home / User / Documents'
+if not os.path.exists(path):
+    os.mkdir(path)
+
+os.chdir(path)
+
+i=1
+def dataCoordinate():
+    directory="Piture_"+str(i)
+    pod_path=os.path.join(path, directory)
+    os.chdir(pod_path)
+    picture_path=pod_path+"/Picture.jpg"
+    cv2.imwrite(picture_path,frame)
+    f = open("souradnice.txt","x") 
+    f = open("souradnice.txt", "w")
+    f.write(" Global Location: %s\n" % vehicle.location.global_frame)
+    f.write(" Global Location (relative altitude): %s\n" % vehicle.location.global_relative_frame)
+    f.write(" Local Location: %s\n" % vehicle.location.local_frame)
+    f.close()
+
+### CONNECT BETWEEN NVIDIA JETSON NANO AND PIXHAWK #####
+from dronekit import connect, VehicleMode
+vehicle=connect('/dev/ttyACM0',wait_ready=True, baud=57600)
+vehicle.wait_ready('autopilot_version')
 
 def nothing(x):
     pass
@@ -41,6 +82,8 @@ while True:
     # upper_red= np.array([u_h,u_s,u_v])
     # mask=cv2.inRange(hsv,lowest_red,upper_red)
 
+
+
     ###### DETECT THE RED COLOR #############
     lowest_red1= np.array([0, 100, 20])
     upper_red1= np.array([10,255,255])
@@ -54,8 +97,6 @@ while True:
     #Erosion
     kernel= np.ones((5,5),np.uint8)
     mask_red = cv2.erode(mask_red,kernel)
-
-    
 
     #Contours detection
     contours,_=cv2.findContours(mask_red,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -80,6 +121,10 @@ while True:
                 # draw the contour and center of the shape on the image
                 cv2.drawContours(frame, [approx], -1, (0, 255, 0), 2)
                 cv2.circle(frame, (cX, cY), 7, (255, 255, 255), -1)
+                dataCoordinate()
+
+
+
     ######## DETECT THE BLUE COLOR ####################
 
     lowest_blue1= np.array([100, 150, 0])
@@ -94,7 +139,6 @@ while True:
     #Erosion
     kernel= np.ones((5,5),np.uint8)
     mask_blue = cv2.erode(mask_blue,kernel)
-
 
     #Contours detection
     contours,_=cv2.findContours(mask_blue,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -119,6 +163,7 @@ while True:
                 # draw the contour and center of the shape on the image
                 cv2.drawContours(frame, [approx], -1, (0, 255, 0), 2)
                 cv2.circle(frame, (cX, cY), 7, (255, 255, 255), -1)
+                dataCoordinate()
 
 
     ### DETECT QR CODE ###
@@ -139,6 +184,8 @@ while True:
 
         # Put Text in frame of Camera
         cv2.putText(frame,myData,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_SIMPLEX,0.9,(255,0,255),2)
+        dataCoordinate()
+
 
     #### SHOW ALL THE WINDOWS #############
     cv2.imshow("Frame",frame)
@@ -149,7 +196,5 @@ while True:
         break
 
 cap.release()
-# cv2.destroyAllWindows()
-#key = cv2.waitKey(0)
 
 cv2.destroyAllWindows()
